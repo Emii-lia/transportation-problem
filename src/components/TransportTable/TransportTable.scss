@@ -1,0 +1,9 @@
+.TransportTable {
+  @apply w-full h-full flex flex-col border-collapse;
+  .tr-row {
+    @apply flex flex-col;
+    .tr-col {
+      @apply flex flex-row;
+    }
+  }
+}
