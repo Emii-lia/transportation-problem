@@ -1,0 +1,6 @@
+.ToggleInput {
+  @apply w-full flex items-center justify-start p-4 gap-4;
+  .toggle-label {
+    @apply text-zinc-950 font-semibold;
+  }
+}

@@ -1,0 +1,11 @@
+.Button {
+  @apply flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-500 border border-transparent rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply transition duration-150 ease-in-out;
+  &.primary {
+    @apply bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+  }
+  &.outlined {
+    @apply bg-transparent border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white focus:ring-blue-500;
+  }
+}

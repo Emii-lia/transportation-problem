@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ReactQuery from "@/provider/ReactQuery";
+import { ToastContainer } from "react-toastify";
+import React from "react";
+
+import "reactflow/dist/style.css"
+import "reactflow/dist/base.css"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +33,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ReactQuery>
+          {children}
+        </ReactQuery>
+      <ToastContainer/>
       </body>
     </html>
   );
