@@ -1,0 +1,20 @@
+.CellInput {
+  @apply w-10 aspect-square text-lg text-zinc-950;
+  .value-input {
+    @apply appearance-none border-none bg-transparent text-center p-2 w-full aspect-square rounded-none;
+  }
+  .display-cell {
+    @apply w-full h-full flex items-center justify-center text-center p-2;
+  }
+  &.withBorder {
+    .display-cell {
+      @apply border border-zinc-300;
+    }
+    .value-input {
+      @apply border border-zinc-300;
+      &:focus {
+        @apply outline-none border border-blue-500;
+      }
+    }
+  }
+}
