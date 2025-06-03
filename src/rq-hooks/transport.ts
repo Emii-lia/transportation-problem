@@ -1,12 +1,18 @@
 import { useMutation } from "react-query";
 import { transportApi } from "@/api/apiClient";
-import { BalasTrasportationDataStepByStep, MinitabTransportationDataStepByStep, TransportData } from "@/api";
+import {
+  BalasTrasportationDataStepByStep,
+  CancelablePromise, MinitabResponse,
+  MinitabTransportationDataStepByStep,
+  TransportData
+} from "@/api";
+import { BalasResponseStepByStep } from "@/types/data";
 
 export const useMiniTab = () => {
   return useMutation({
     mutationKey: ["miniTab"],
     mutationFn: async (data: TransportData) => {
-      return transportApi.minitab(data)
+      return transportApi.minitab(data) as CancelablePromise<MinitabResponse>
     }
   })
 }
@@ -33,7 +39,7 @@ export const useStepByStepBalas = () => {
   return useMutation({
     mutationKey: ["balasStepByStep"],
     mutationFn: async (data: BalasTrasportationDataStepByStep) => {
-      return transportApi.balasStepBystep(data)
+      return transportApi.balasStepBystep(data) as BalasResponseStepByStep
     }
   })
 }
