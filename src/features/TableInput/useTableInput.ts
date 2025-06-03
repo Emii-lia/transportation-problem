@@ -129,9 +129,9 @@ const useTableInput = () => {
     stepByStepBalas(stepBalasData, {
       onSuccess: (data) => {
         setResult(data)
+        setStepCount((prev) => prev + 1)
         if (data["Allocation"]) {
           setIsSatisfied(true)
-          setStepCount((prev) => prev + 1)
           setAllocationMatrix(data["Allocation"] as number[][]);
           setResult({
             ...data,
@@ -162,7 +162,7 @@ const useTableInput = () => {
           supply: supplies,
           costMatrix: costs,
           demand: demands,
-          allocationMatrix,
+          allocationMatrix: Array.from({ length: row }, () => Array.from({ length: col }, () => 0)),
           totalCost: 0
         }
         await handleStepByStepBalas(stepBalasData)
@@ -182,11 +182,12 @@ const useTableInput = () => {
       })
     } else {
       if (isByStep) {
+        setStepCount(0)
         const stepMinitabData: MinitabTransportationDataStepByStep = {
           minitabMatrix: costs,
           supply: supplies,
           demand: demands,
-          allocationMatrix,
+          allocationMatrix: Array.from({ length: row }, () => Array.from({ length: col }, () => 0)),
           totalCost: 0
         }
         await handleStepByStepMinitab(stepMinitabData)
