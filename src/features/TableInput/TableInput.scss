@@ -1,10 +1,10 @@
 .TableInput {
-  @apply w-full flex flex-col gap-4 p-8;
+  @apply w-full flex flex-col gap-4 p-8 max-w-5xl m-auto bg-white rounded-lg shadow-sm border border-gray-200;
   .toggle-input-group {
-    @apply flex flex-col gap-8 w-full px-4 py-6;
+    @apply flex flex-col gap-8 w-full px-4 py-6 border-b border-b-zinc-200;
   }
   .input-group {
-    @apply w-full flex items-center gap-4;
+    @apply w-full flex items-center gap-4 py-4;
     .t-input-field {
       @apply flex flex-col gap-2;
       .input-label {
@@ -12,8 +12,11 @@
       }
     }
   }
+  .section-title {
+    @apply text-zinc-950 text-2xl font-semibold text-center py-2;
+  }
   .result-container {
-    @apply p-6 flex flex-col gap-6 w-full;
+    @apply p-6 flex flex-col gap-6 w-full border-t border-t-zinc-200;
     .result-item {
       @apply flex flex-col gap-3 w-full p-2 border-b border-b-zinc-200 pb-6;
       &:last-child {

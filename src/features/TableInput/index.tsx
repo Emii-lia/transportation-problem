@@ -26,6 +26,9 @@ const TableInput = () => {
       onClick={handleNextStep}
     >
       <div className="toggle-input-group">
+        <h1 className="section-title">
+          Transportation Problem ( Minitab/Balas )
+        </h1>
         <ToggleInput {...stepToggle}>
           {stepToggle.isActive ? "Step by Step" : "Final Result"}
         </ToggleInput>
@@ -76,6 +79,9 @@ const TableInput = () => {
                 className="result-container"
                 id="step-result"
               >
+                <h2 className="section-title">
+                  Results
+                </h2>
                 <div className="result-item">
                   <h2 className="item-title">
                     Allocation
@@ -115,6 +121,9 @@ const TableInput = () => {
                 className="result-container"
                 id="final-result"
               >
+                <h2 className="section-title">
+                  Results
+                </h2>
                 <div className="result-item">
                   <h2 className="item-title">
                     Allocation
