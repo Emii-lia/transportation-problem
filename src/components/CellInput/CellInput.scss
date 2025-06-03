@@ -1,19 +1,90 @@
 .CellInput {
-  @apply w-10 aspect-square text-lg text-zinc-950;
+  @apply w-12 aspect-square text-base font-medium text-slate-700 relative;
+  transition: all 0.2s ease;
+
   .value-input {
-    @apply appearance-none border-none bg-transparent text-center p-2 w-full aspect-square rounded-none;
+    @apply appearance-none bg-white text-center p-2 w-full aspect-square rounded-none font-medium;
+    border: 1px solid #cbd5e1;
+    transition: all 0.2s ease;
+
+    &:focus {
+      @apply outline-none border-2 border-blue-500 bg-blue-50 text-blue-900 font-semibold;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      transform: scale(1.05);
+      z-index: 10;
+      position: relative;
+    }
+
+    &:hover:not(:focus) {
+      @apply border-slate-400 bg-slate-50;
+    }
   }
+
   .display-cell {
-    @apply w-full h-full flex items-center justify-center text-center p-2;
+    @apply w-full h-full flex items-center justify-center text-center p-2 cursor-pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      @apply bg-slate-100 text-slate-900 font-semibold;
+      transform: scale(1.02);
+    }
   }
+
   &.withBorder {
     .display-cell {
-      @apply border border-zinc-300;
+      @apply border border-slate-300 bg-slate-50;
+      position: relative;
+
+      &::after {
+        @apply absolute top-0 right-0 w-0 h-0;
+        content: '';
+        border-style: solid;
+        border-width: 0 8px 8px 0;
+        border-color: transparent #e2e8f0 transparent transparent;
+      }
+
+      &:hover {
+        @apply border-slate-400 bg-white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        &::after {
+          border-color: transparent #cbd5e1 transparent transparent;
+        }
+      }
     }
+
     .value-input {
-      @apply border border-zinc-300;
+      @apply border border-slate-300 bg-slate-50;
+
       &:focus {
-        @apply outline-none border border-blue-500;
+        @apply border-2 border-blue-500 bg-white;
+      }
+    }
+  }
+
+  &.disabled {
+    @apply cursor-default;
+    .display-cell {
+      @apply cursor-default;
+
+      &:hover {
+        @apply bg-slate-50;
+        transform: none;
+      }
+    }
+  }
+
+  &:has(.display-cell) {
+    &.disabled .display-cell {
+      @apply font-bold text-slate-800;
+
+      &:not(:empty) {
+        position: relative;
+
+        &::before {
+          @apply absolute inset-0 opacity-20 rounded-sm;
+          content: '';
+        }
       }
     }
   }

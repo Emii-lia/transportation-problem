@@ -31,7 +31,7 @@ const CellInput = ({
       className={classNames(
         "CellInput",
         className,
-        {withBorder}
+        {withBorder, disabled},
       )}
     >
       {isEditing?

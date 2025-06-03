@@ -66,8 +66,19 @@ const TableInput = () => {
           />
         </div>
       </div>
-      <TransportTable {...tr}/>
+      <div className="input-group">
+        <div className="t-input-field">
+          <label
+            htmlFor="row"
+            className="input-label"
+          >
+            Table Input
+          </label>
+        <TransportTable {...tr}/>
+        </div>
+      </div>
       <Button
+        className="button"
         label="Submit"
         onClick={handleSubmit}
       />
