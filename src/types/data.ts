@@ -1,9 +1,3 @@
-interface IGraphData {
-  totalCost: number,
-  allocation: number[][],
-  graph: Record<string, (string | number)[]>
-}
-
 export interface BalasResponseStepByStep {
   totalCost?: number,
   Allocation?: number[][],
