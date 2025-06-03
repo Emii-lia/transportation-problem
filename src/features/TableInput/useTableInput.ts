@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useMiniTab, useStepByStepMinitab } from "@/rq-hooks/transport";
-import { MinitabTransportationDataStepByStep } from "@/api";
+import { useBalas, useMiniTab, useStepByStepBalas, useStepByStepMinitab } from "@/rq-hooks/transport";
+import { BalasTrasportationDataStepByStep, MinitabTransportationDataStepByStep } from "@/api";
+import { toast } from "react-toastify";
 
 const useTableInput = () => {
   const [row, setRow] = useState(0)
@@ -8,6 +9,7 @@ const useTableInput = () => {
   const [isByStep, setIsByStep] = useState(false)
   const [isBalas, setIsBalas] = useState(false)
   const [isSatisfied, setIsSatisfied] = useState(false)
+  const [stepCount, setStepCount] = useState(0)
   const [allocationMatrix, setAllocationMatrix] = useState<number[][]>(
     Array.from({ length: row }, () => Array.from({ length: col }, () => 0))
   )
@@ -29,6 +31,12 @@ const useTableInput = () => {
   const {
     mutate: stepByStepMinitab
   } = useStepByStepMinitab()
+  const {
+    mutate: balas
+  } = useBalas()
+  const {
+    mutate: stepByStepBalas
+  } = useStepByStepBalas()
 
   const onCellChange = (
     rowIndex: number, colIndex: number, value: number
@@ -38,6 +46,7 @@ const useTableInput = () => {
       newCosts[rowIndex][colIndex] = value
       return newCosts
     })
+    setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
   }
 
   const onSupplyChange = (index: number, value: number) => {
@@ -46,6 +55,7 @@ const useTableInput = () => {
       newSupplies[index] = value
       return newSupplies
     })
+    setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
   }
 
   const onDemandChange = (index: number, value: number) => {
@@ -54,6 +64,7 @@ const useTableInput = () => {
       newDemands[index] = value
       return newDemands
     })
+    setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
   }
 
   const handleColChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -68,13 +79,19 @@ const useTableInput = () => {
 
   const toggleByStep = () => {
     setIsByStep((prev) => {
-      setIsSatisfied(!prev)
+      setIsSatisfied(false)
       return !prev
     })
+    setStepCount(0)
+    setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
+    setResult(null)
   }
 
   const toggleBalas = () => {
+    setResult(null)
+    setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
     setIsBalas((prev) => !prev)
+    setStepCount(0)
   }
 
   const handleStepByStepMinitab = async (
@@ -84,6 +101,7 @@ const useTableInput = () => {
     stepByStepMinitab(stepMinitabData, {
       onSuccess: (data) => {
         setResult(data)
+        setStepCount(prev => prev + 1)
         if (data["Allocation"]) {
           setIsSatisfied(true)
           setAllocationMatrix(data["Allocation"] as number[][]);
@@ -95,16 +113,8 @@ const useTableInput = () => {
 
         } else {
           setIsSatisfied(false)
-
-          setTimeout(() => {
-            handleStepByStepMinitab({
-              minitabMatrix: costs,
-              supply: data["supply"] as number[],
-              demand: data["demand"] as number[],
-              totalCost: data["totalCost"] as unknown as number,
-              allocationMatrix: data["allocationMatrix"] as number[][]
-            })
-          }, 3000);
+          if (stepCount === 0)
+            toast.info("Click anywhere to continue")
 
         }
       },
@@ -113,30 +123,114 @@ const useTableInput = () => {
       }
     })
   }
-  const handleSubmit = async () => {
-    if (isByStep) {
-      const stepMinitabData: MinitabTransportationDataStepByStep = {
-        minitabMatrix: costs,
-        supply: supplies,
-        demand: demands,
-        allocationMatrix,
-        totalCost: 0
-      }
-      await handleStepByStepMinitab(stepMinitabData)
-      return
-    }
-    miniTab({
-      cost: costs,
-      supply: supplies,
-      demand: demands
-    }, {
+
+  const handleStepByStepBalas = async (
+    stepBalasData: BalasTrasportationDataStepByStep) => {
+    stepByStepBalas(stepBalasData, {
       onSuccess: (data) => {
         setResult(data)
+        if (data["Allocation"]) {
+          setIsSatisfied(true)
+          setStepCount((prev) => prev + 1)
+          setAllocationMatrix(data["Allocation"] as number[][]);
+          setResult({
+            ...data,
+            "supply": Array.from({ length: row }, () => 0),
+            "demand": Array.from({ length: col }, () => 0),
+          })
+        } else {
+          setIsSatisfied(false)
+
+          if (stepCount === 0)
+            toast.info("Click anywhere to continue")
+
+        }
       },
       onSettled: () => {
         console.log(result)
       }
     })
+  }
+
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    if (isBalas) {
+      if (isByStep) {
+        setStepCount(0)
+        const stepBalasData: BalasTrasportationDataStepByStep = {
+          balasMatrix: costs,
+          supply: supplies,
+          costMatrix: costs,
+          demand: demands,
+          allocationMatrix,
+          totalCost: 0
+        }
+        await handleStepByStepBalas(stepBalasData)
+        return
+      }
+      balas({
+        cost: costs,
+        supply: supplies,
+        demand: demands
+      }, {
+        onSuccess: (data) => {
+          setResult(data)
+        },
+        onSettled: () => {
+          console.log(result)
+        }
+      })
+    } else {
+      if (isByStep) {
+        const stepMinitabData: MinitabTransportationDataStepByStep = {
+          minitabMatrix: costs,
+          supply: supplies,
+          demand: demands,
+          allocationMatrix,
+          totalCost: 0
+        }
+        await handleStepByStepMinitab(stepMinitabData)
+        return
+      }
+      miniTab({
+        cost: costs,
+        supply: supplies,
+        demand: demands
+      }, {
+        onSuccess: (data) => {
+          setResult(data)
+        },
+        onSettled: () => {
+          console.log(result)
+        }
+      })
+    }
+  }
+
+  const handleNextStep = async () => {
+    if (!result || result["Graph"]) return
+    if (isByStep && !isSatisfied) {
+      if (isBalas) {
+        const stepBalasData: BalasTrasportationDataStepByStep = {
+          balasMatrix: result["balasMatrix"],
+          supply: result["supply"] ?? supplies,
+          demand: result["demand"] ?? demands,
+          costMatrix: costs,
+          allocationMatrix: result["allocationMatrix"] ?? allocationMatrix,
+          totalCost: result["totalCost"]
+        }
+        await handleStepByStepBalas(stepBalasData)
+      } else {
+        const stepMinitabData: MinitabTransportationDataStepByStep = {
+          minitabMatrix: costs,
+          supply: result["supply"] ?? supplies,
+          demand: result["demand"] ?? demands,
+          allocationMatrix: result["allocationMatrix"] ?? allocationMatrix,
+          totalCost: result["totalCost"] ?? 0
+        }
+        await handleStepByStepMinitab(stepMinitabData)
+      }
+    }
   }
 
   useEffect(() => {
@@ -170,6 +264,7 @@ const useTableInput = () => {
       isActive: isBalas,
       onChange: toggleBalas,
     },
+    handleNextStep,
     isSatisfied
   }
 }

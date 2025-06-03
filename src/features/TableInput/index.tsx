@@ -17,10 +17,14 @@ const TableInput = () => {
     isSatisfied,
     balasToggle,
     stepToggle,
+    handleNextStep,
     ...tr
   } = useTableInput()
   return (
-    <div className="TableInput">
+    <div
+      className="TableInput"
+      onClick={handleNextStep}
+    >
       <div className="toggle-input-group">
         <ToggleInput {...stepToggle}>
           {stepToggle.isActive ? "Step by Step" : "Final Result"}
@@ -83,6 +87,19 @@ const TableInput = () => {
                     disabled
                   />
                 </div>
+                {result["balasMatrix"] &&
+                  <div className="result-item">
+                    <h2 className="item-title">
+                      Balas Matrix
+                    </h2>
+                    <TransportTable
+                      costs={result["balasMatrix"]}
+                      demands={[]}
+                      supplies={[]}
+                      disabled
+                    />
+                  </div>
+                }
                 <div className="result-item">
                   <h2 className="item-title">
                     Total Cost (Z)
@@ -105,7 +122,7 @@ const TableInput = () => {
                   <TransportTable
                     demands={result["demand"]}
                     supplies={result["supply"]}
-                    costs={result["Allocation"]}
+                    costs={result["Allocation"] ?? result["allocationMatrix"]}
                     disabled
                   />
                 </div>
