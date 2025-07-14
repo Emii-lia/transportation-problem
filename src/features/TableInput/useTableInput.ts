@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useBalas, useMiniTab, useStepByStepBalas, useStepByStepMinitab } from "@/rq-hooks/transport";
-import { BalasTrasportationDataStepByStep, MinitabTransportationDataStepByStep } from "@/api";
+import { useBalas, useMiniTab, useOptimizeGraph, useStepByStepBalas, useStepByStepMinitab } from "@/rq-hooks/transport";
+import {
+  BalasTrasportationDataStepByStep,
+  GraphSolutionResponse,
+  MinitabTransportationDataStepByStep,
+  SteppingStoneDto
+} from "@/api";
 import { toast } from "react-toastify";
 
 const useTableInput = () => {
@@ -23,6 +28,7 @@ const useTableInput = () => {
     Array.from({ length: col }, () => 0)
   )
   const [result, setResult] = useState<Record<string, any> | null>(null)
+  const [optimizedGraph, setOptimizedGraph] = useState<GraphSolutionResponse | null>(null)
 
   const {
     mutate: miniTab
@@ -37,6 +43,10 @@ const useTableInput = () => {
   const {
     mutate: stepByStepBalas
   } = useStepByStepBalas()
+  const {
+    mutate: optimizeGraph,
+    isLoading: optimizeGraphLoading,
+  } = useOptimizeGraph()
 
   const onCellChange = (
     rowIndex: number, colIndex: number, value: number
@@ -94,6 +104,30 @@ const useTableInput = () => {
     setStepCount(0)
   }
 
+  const handleGraphOptimization = async (
+    allocation: Array<Array<number>>
+  ) => {
+    if (
+      optimizeGraphLoading ||
+      !allocation
+    ) return
+    const data: SteppingStoneDto = {
+      initialMatrix: costs,
+      allocationMatrix: allocation,
+    }
+    optimizeGraph(data, {
+      onSuccess: (data) => {
+        setOptimizedGraph(data)
+      },
+      onError: () => {
+        toast.error("Error optimizing graph. Please check your input data.")
+      },
+      onSettled: () => {
+        console.log(optimizedGraph)
+      }
+    })
+  }
+
   const handleStepByStepMinitab = async (
     stepMinitabData: MinitabTransportationDataStepByStep
   ) => {
@@ -104,6 +138,7 @@ const useTableInput = () => {
         setStepCount(prev => prev + 1)
         if (data["Allocation"]) {
           setIsSatisfied(true)
+          handleGraphOptimization(data["Allocation"] as number[][]);
           setAllocationMatrix(data["Allocation"] as number[][]);
           setResult({
             ...data,
@@ -132,6 +167,7 @@ const useTableInput = () => {
         setStepCount((prev) => prev + 1)
         if (data["Allocation"]) {
           setIsSatisfied(true)
+          handleGraphOptimization(data["Allocation"] as number[][]);
           setAllocationMatrix(data["Allocation"] as number[][]);
           setResult({
             ...data,
@@ -175,6 +211,7 @@ const useTableInput = () => {
       }, {
         onSuccess: (data) => {
           setResult(data)
+          handleGraphOptimization(data["Allocation"] as number[][]);
         },
         onSettled: () => {
           console.log(result)
@@ -200,6 +237,7 @@ const useTableInput = () => {
       }, {
         onSuccess: (data) => {
           setResult(data)
+          handleGraphOptimization(data["Allocation"] as number[][]);
         },
         onSettled: () => {
           console.log(result)
@@ -257,6 +295,7 @@ const useTableInput = () => {
     },
     handleSubmit,
     result,
+    optimizedGraph,
     stepToggle: {
       isActive: isByStep,
       onChange: toggleByStep,
