@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 import Graph from "@/features/Graph";
 import ToggleInput from "@/features/ToggleInput";
 import React from "react";
+import OptimizedGraph from "@/features/OptimizedGraph";
 
 const TableInput = () => {
   const {
@@ -18,6 +19,7 @@ const TableInput = () => {
     balasToggle,
     stepToggle,
     handleNextStep,
+    optimizedGraph,
     ...tr
   } = useTableInput()
   return (
@@ -163,6 +165,14 @@ const TableInput = () => {
                     graph={result["Graph"]}
                   />
                 </div>
+                {optimizedGraph &&
+                  <div className="result-item">
+                    <h2 className="item-title">
+                      Optimized Graph
+                    </h2>
+                    <OptimizedGraph graph={optimizedGraph}/>
+                  </div>
+                }
               </div>
             }
           </React.Fragment>
