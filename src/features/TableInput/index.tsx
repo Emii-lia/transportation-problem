@@ -166,11 +166,41 @@ const TableInput = () => {
                   />
                 </div>
                 {optimizedGraph &&
-                  <div className="result-item">
-                    <h2 className="item-title">
-                      Optimized Graph
+                  <div className="optimized-result">
+                    <h2 className="section-title">
+                      Optimized Result
                     </h2>
-                    <OptimizedGraph graph={optimizedGraph}/>
+                    {!!optimizedGraph.edges &&
+                      <div className="result-item">
+                        <h2 className="item-title">
+                          Optimized Graph
+                        </h2>
+                        <OptimizedGraph graph={optimizedGraph.edges}/>
+                      </div>
+                    }
+                    {!!optimizedGraph.allocationMatrix &&
+                      <div className="result-item">
+                        <h2 className="item-title">
+                          Optimized Allocation
+                        </h2>
+                        <TransportTable
+                          costs={optimizedGraph.allocationMatrix}
+                          demands={[]}
+                          supplies={[]}
+                          disabled
+                        />
+                      </div>
+                    }
+                    {!!optimizedGraph.totalCost &&
+                      <div className="result-item">
+                        <h2 className="item-title">
+                          Optimized Total Cost (Z)
+                        </h2>
+                        <div className="result-value">
+                          {optimizedGraph.totalCost}
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
               </div>
