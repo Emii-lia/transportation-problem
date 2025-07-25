@@ -1,4 +1,4 @@
-import { GraphSolutionResponse } from "@/api";
+import { GraphEdgeDto } from "@/api";
 import useOptimizedGraph from "@/features/OptimizedGraph/useOptimizedGraph";
 import dynamic from "next/dynamic";
 import "./OptimizedGraph.scss"
@@ -14,7 +14,7 @@ const nodeTypes: NodeTypes = {
   nodeItem: NodeItem,
 }
 type Props = {
-  graph: GraphSolutionResponse
+  graph: Array<GraphEdgeDto>
 }
 const OptimizedGraph = ({
   graph

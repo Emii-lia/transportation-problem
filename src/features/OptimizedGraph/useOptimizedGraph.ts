@@ -1,14 +1,14 @@
 import { Node, Edge } from "reactflow";
-import { GraphSolutionResponse } from "@/api";
 import { useEffect, useMemo } from "react";
+import { GraphEdgeDto } from "@/api";
 
 const useOptimizedGraph = (
-  graph: GraphSolutionResponse
+  graph: Array<GraphEdgeDto>
 ) => {
   const nodes: Node[] = useMemo(() =>
-    graph.edges ?
+    graph ?
     [
-      ...graph.edges.map((item, index) => ({
+      ...graph.map((item, index) => ({
         id: `${item.leftNodeName}`,
         type: "nodeItem",
         data: {
@@ -35,7 +35,7 @@ const useOptimizedGraph = (
         },
         ariaLabel: item.leftNodePotential?.toString()
       })),
-      ...graph.edges.map((item, index) => ({
+      ...graph.map((item, index) => ({
         id: `${item.rightNodeName}`,
         type: "nodeItem",
         data: {
@@ -66,8 +66,8 @@ const useOptimizedGraph = (
   , [graph]);
 
   const edges: Edge[] = useMemo(() => (
-    graph.edges?
-      graph.edges.map((item) => ({
+    graph?
+      graph.map((item) => ({
         id: `${item.leftNodeName}-${item.rightNodeName}`,
         source: `${item.leftNodeName}`,
         target: `${item.rightNodeName}`,
