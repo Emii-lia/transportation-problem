@@ -31,7 +31,7 @@ const NodeItem = ({ data }: NodeProps<Props>) => {
         className={classNames("potential", position)}
         title={`Potential: ${potential}`}
       >
-        {`${potential}`}
+        {`${potential < - 10000 ? 'e' : potential}`}
       </div>
     </div>
   )
