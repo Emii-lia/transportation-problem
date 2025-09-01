@@ -1,6 +1,8 @@
 import dynamic from "next/dynamic";
 import useGraph from "@/features/Graph/useGraph";
 import "./Graph.scss"
+import { NodeTypes } from "reactflow";
+import NodeItem from "@/components/NodeItem";
 
 const ReactFlow = dynamic(() =>
   import("reactflow").then(mod => mod.default), {ssr: false})
@@ -11,6 +13,10 @@ type Props = {
   allocation: number[][],
   graph: Record<string, (string | number)[]>
 }
+const nodeTypes: NodeTypes = {
+  nodeItem: NodeItem,
+}
+
 const Graph = ({
   allocation,
   graph
@@ -27,6 +33,7 @@ const Graph = ({
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         fitView
       >
         <Controls/>

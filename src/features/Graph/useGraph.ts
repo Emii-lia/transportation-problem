@@ -11,8 +11,11 @@ const useGraph = ({
   const nodes: Node[] = [
     ...Object.keys(graph).map((source, index) => ({
       id: source,
+      type: "nodeItem",
       data: {
-        label: source
+        label: source,
+        potential: 0,
+        position: "left"
       },
       draggable: true,
       position: {
@@ -35,8 +38,11 @@ const useGraph = ({
     ...Array.from({ length: allocation[0].length }, (_, i) => i + 1)
       .map((target, index) => ({
         id: target.toString(),
+        type: "nodeItem",
         data: {
-          label: target.toString()
+          label: target.toString(),
+          potential: 0,
+          position: "right"
         },
         draggable: true,
         position: {
