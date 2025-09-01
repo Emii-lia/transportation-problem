@@ -6,6 +6,7 @@ type Props = {
   demands: number[]
   supplies: number[]
   costs: number[][],
+  id?: string
   onCellChange?: (rowIndex: number, colIndex: number, value: number) => void
   onSupplyChange?: (index: number, value: number) => void
   onDemandChange?: (index: number, value: number) => void
@@ -16,12 +17,16 @@ const TransportTable = ({
   demands,
   disabled,
   supplies,
+  id,
   onCellChange,
   onSupplyChange,
   onDemandChange
 }: Props) => {
   return (
-    <div className="TransportTable">
+    <div
+      className="TransportTable"
+      id={id}
+    >
       <div
         className="tr-row"
       >
@@ -34,6 +39,7 @@ const TransportTable = ({
               <CellInput
                 value={c}
                 key={colIndex}
+                id={`cost-cell-${rowIndex}-${colIndex}`}
                 onChange={
                   !!onCellChange? (value: number) =>
                     onCellChange(rowIndex, colIndex, value)

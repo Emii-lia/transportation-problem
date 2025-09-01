@@ -8,3 +8,5 @@ export interface BalasResponseStepByStep {
   allocationMatrix?: number[][],
   "Total Cost"?: number,
 }
+
+export type CellColor = "red" | "green" | "none"

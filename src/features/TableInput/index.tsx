@@ -20,6 +20,8 @@ const TableInput = () => {
     stepToggle,
     handleNextStep,
     optimizedGraph,
+    optimizedAllocationMatrix,
+    isFinal,
     ...tr
   } = useTableInput()
   return (
@@ -119,14 +121,6 @@ const TableInput = () => {
                     />
                   </div>
                 }
-                <div className="result-item">
-                  <h2 className="item-title">
-                    Total Cost (Z)
-                  </h2>
-                  <div className="result-value">
-                    {result["totalCost"]}
-                  </div>
-                </div>
               </div>
             }
             {(!stepToggle.isActive || isSatisfied) &&
@@ -165,11 +159,25 @@ const TableInput = () => {
                     graph={result["Graph"]}
                   />
                 </div>
-                {optimizedGraph &&
-                  <div className="optimized-result">
+                {(optimizedGraph) &&
+                  // isFinal ?
+                  (<div className="optimized-result">
                     <h2 className="section-title">
                       Optimized Result
                     </h2>
+                    {!!optimizedAllocationMatrix &&
+                      <div className="result-item">
+                        <h2 className="item-title">
+                          Optimized Allocation
+                        </h2>
+                        <TransportTable
+                          costs={optimizedAllocationMatrix}
+                          demands={[]}
+                          supplies={[]}
+                          disabled
+                        />
+                      </div>
+                    }
                     {!!optimizedGraph.edges &&
                       <div className="result-item">
                         <h2 className="item-title">
@@ -178,30 +186,40 @@ const TableInput = () => {
                         <OptimizedGraph graph={optimizedGraph.edges}/>
                       </div>
                     }
-                    {!!optimizedGraph.allocationMatrix &&
-                      <div className="result-item">
-                        <h2 className="item-title">
-                          Optimized Allocation
-                        </h2>
-                        <TransportTable
-                          costs={optimizedGraph.allocationMatrix}
-                          demands={[]}
-                          supplies={[]}
-                          disabled
-                        />
+                    <div className="result-item">
+                      <h2 className="item-title">
+                        Optimized Total Cost (Z)
+                      </h2>
+                      <div className="result-value">
+                        {!optimizedGraph.totalCost ?
+                          result["Total Cost"] :
+                          ((optimizedGraph.totalCost <= 0)?
+                          result["Total Cost"] + optimizedGraph.totalCost
+                          : optimizedGraph.totalCost)
+                        }
                       </div>
-                    }
-                    {!!optimizedGraph.totalCost &&
-                      <div className="result-item">
-                        <h2 className="item-title">
-                          Optimized Total Cost (Z)
-                        </h2>
-                        <div className="result-value">
-                          {optimizedGraph.totalCost}
-                        </div>
-                      </div>
-                    }
-                  </div>
+                    </div>
+                  </div>)
+                  // :
+                  // <div className="optimized-result">
+                  //   <h2 className="section-title">
+                  //     Optimized Result
+                  //   </h2>
+                  //   {!!optimizedAllocationMatrix &&
+                  //     <div className="result-item">
+                  //       <h2 className="item-title">
+                  //         Optimized Allocation
+                  //       </h2>
+                  //       <TransportTable
+                  //         costs={optimizedAllocationMatrix}
+                  //         id="optimized-table"
+                  //         demands={[]}
+                  //         supplies={[]}
+                  //         disabled
+                  //       />
+                  //     </div>
+                  //   }
+                  // </div>
                 }
               </div>
             }
