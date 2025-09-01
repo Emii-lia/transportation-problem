@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { isValidElement, useEffect, useState } from "react";
 import { useBalas, useMiniTab, useOptimizeGraph, useStepByStepBalas, useStepByStepMinitab } from "@/rq-hooks/transport";
 import {
   BalasTrasportationDataStepByStep,
@@ -13,9 +13,15 @@ const useTableInput = () => {
   const [col, setCol] = useState(0)
   const [isByStep, setIsByStep] = useState(false)
   const [isBalas, setIsBalas] = useState(false)
+  const [isFinal, setIsFinal] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [currentCycle, setCurrentCycle] = useState(0)
   const [isSatisfied, setIsSatisfied] = useState(false)
   const [stepCount, setStepCount] = useState(0)
   const [allocationMatrix, setAllocationMatrix] = useState<number[][]>(
+    Array.from({ length: row }, () => Array.from({ length: col }, () => 0))
+  )
+  const [optimizedAllocationMatrix, setOptimizedAllocationMatrix] = useState<number[][]>(
     Array.from({ length: row }, () => Array.from({ length: col }, () => 0))
   )
   const [costs, setCosts] = useState<number[][]>(
@@ -92,6 +98,10 @@ const useTableInput = () => {
       setIsSatisfied(false)
       return !prev
     })
+    setOptimizedGraph(null)
+    setCurrentStep(0)
+    setOptimizedAllocationMatrix([])
+    setIsFinal(false)
     setStepCount(0)
     setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
     setResult(null)
@@ -99,6 +109,10 @@ const useTableInput = () => {
 
   const toggleBalas = () => {
     setResult(null)
+    setOptimizedGraph(null)
+    setOptimizedAllocationMatrix([])
+    setIsSatisfied(false)
+    setIsFinal(false)
     setAllocationMatrix(Array.from({ length: row }, () => Array.from({ length: col }, () => 0)))
     setIsBalas((prev) => !prev)
     setStepCount(0)
@@ -118,15 +132,42 @@ const useTableInput = () => {
     optimizeGraph(data, {
       onSuccess: (data) => {
         setOptimizedGraph(data)
+        setOptimizedAllocationMatrix(data.allocationMatrix ?? []);
       },
       onError: () => {
         toast.error("Error optimizing graph. Please check your input data.")
-      },
-      onSettled: () => {
-        console.log(optimizedGraph)
       }
     })
   }
+
+  // const handleNextOptimization =  () => {
+  //   if (optimizedGraph && optimizedGraph.allocationMatrixList && optimizedGraph.cycles) {
+  //     const nextAllocation = optimizedGraph.allocationMatrixList[currentStep + 1];
+  //     if (nextAllocation) {
+  //       if (optimizedGraph.cycles[currentStep]) {
+  //         const cycle = optimizedGraph.cycles[currentStep]
+  //         if (cycle.length === currentCycle + 1 ) {
+  //           setCurrentStep((prev) => prev + 1);
+  //           setOptimizedAllocationMatrix(nextAllocation);
+  //         } else {
+  //           const coord = cycle[currentCycle]
+  //           const currentCell = document.querySelector(`#optimized-table>.tr-row>.tr-col>#cost-cell-${coord[0]}-${coord[1]}`)
+  //           if (currentCell) {
+  //             currentCell.classList.add(currentCycle % 2 === 0 ? "green" : "red")
+  //             setCurrentCycle(prev => prev + 1)
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       setIsFinal(true);
+  //       const allCell = document.querySelectorAll("#optimized-table>.tr-row>.tr-col>.CellInput")
+  //       allCell.forEach((cell) => {
+  //         cell.classList.remove("green", "red")
+  //       })
+  //       toast.info("No more optimization steps available.");
+  //     }
+  //   }
+  // }
 
   const handleStepByStepMinitab = async (
     stepMinitabData: MinitabTransportationDataStepByStep
@@ -138,7 +179,6 @@ const useTableInput = () => {
         setStepCount(prev => prev + 1)
         if (data["Allocation"]) {
           setIsSatisfied(true)
-          handleGraphOptimization(data["Allocation"] as number[][]);
           setAllocationMatrix(data["Allocation"] as number[][]);
           setResult({
             ...data,
@@ -152,9 +192,6 @@ const useTableInput = () => {
             toast.info("Click anywhere to continue")
 
         }
-      },
-      onSettled: () => {
-        console.log(result)
       }
     })
   }
@@ -167,7 +204,7 @@ const useTableInput = () => {
         setStepCount((prev) => prev + 1)
         if (data["Allocation"]) {
           setIsSatisfied(true)
-          handleGraphOptimization(data["Allocation"] as number[][]);
+
           setAllocationMatrix(data["Allocation"] as number[][]);
           setResult({
             ...data,
@@ -181,15 +218,15 @@ const useTableInput = () => {
             toast.info("Click anywhere to continue")
 
         }
-      },
-      onSettled: () => {
-        console.log(result)
       }
     })
   }
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
+    setIsFinal(false)
+    setCurrentStep(0)
+    setCurrentCycle(0)
     if (isBalas) {
       if (isByStep) {
         setStepCount(0)
@@ -212,9 +249,6 @@ const useTableInput = () => {
         onSuccess: (data) => {
           setResult(data)
           handleGraphOptimization(data["Allocation"] as number[][]);
-        },
-        onSettled: () => {
-          console.log(result)
         }
       })
     } else {
@@ -238,36 +272,51 @@ const useTableInput = () => {
         onSuccess: (data) => {
           setResult(data)
           handleGraphOptimization(data["Allocation"] as number[][]);
-        },
-        onSettled: () => {
-          console.log(result)
         }
       })
     }
   }
 
   const handleNextStep = async () => {
-    if (!result || result["Graph"]) return
-    if (isByStep && !isSatisfied) {
+    if (!result || isFinal) return
+    if (isByStep) {
       if (isBalas) {
-        const stepBalasData: BalasTrasportationDataStepByStep = {
-          balasMatrix: result["balasMatrix"],
-          supply: result["supply"] ?? supplies,
-          demand: result["demand"] ?? demands,
-          costMatrix: costs,
-          allocationMatrix: result["allocationMatrix"] ?? allocationMatrix,
-          totalCost: result["totalCost"]
+        if (isSatisfied) {
+          if (!optimizedGraph) {
+            await handleGraphOptimization(result["Allocation"] as number[][]);
+          }
+          // } else {
+          //   handleNextOptimization()
+          // }
+        } else {
+          const stepBalasData: BalasTrasportationDataStepByStep = {
+            balasMatrix: result["balasMatrix"],
+            supply: result["supply"] ?? supplies,
+            demand: result["demand"] ?? demands,
+            costMatrix: costs,
+            allocationMatrix: result["allocationMatrix"] ?? allocationMatrix,
+            totalCost: result["totalCost"]
+          }
+          await handleStepByStepBalas(stepBalasData)
         }
-        await handleStepByStepBalas(stepBalasData)
       } else {
-        const stepMinitabData: MinitabTransportationDataStepByStep = {
-          minitabMatrix: costs,
-          supply: result["supply"] ?? supplies,
-          demand: result["demand"] ?? demands,
-          allocationMatrix: result["allocationMatrix"] ?? allocationMatrix,
-          totalCost: result["totalCost"] ?? 0
+        if (isSatisfied) {
+          if (!optimizedGraph) {
+            await handleGraphOptimization(result["Allocation"] as number[][]);
+          }
+          // } else {
+          //   handleNextOptimization()
+          // }
+        } else {
+          const stepMinitabData: MinitabTransportationDataStepByStep = {
+            minitabMatrix : costs,
+            supply : result["supply"] ?? supplies,
+            demand : result["demand"] ?? demands,
+            allocationMatrix : result["allocationMatrix"] ?? allocationMatrix,
+            totalCost : result["totalCost"] ?? 0
+          }
+          await handleStepByStepMinitab(stepMinitabData)
         }
-        await handleStepByStepMinitab(stepMinitabData)
       }
     }
   }
@@ -277,6 +326,10 @@ const useTableInput = () => {
     setSupplies(Array.from({ length: row }, () => 0))
     setDemands(Array.from({ length: col }, () => 0))
   }, [col, row]);
+
+  useEffect(() => {
+    console.log("opt:", optimizedGraph)
+  }, [optimizedGraph]);
 
   return {
     costs,
@@ -296,6 +349,7 @@ const useTableInput = () => {
     handleSubmit,
     result,
     optimizedGraph,
+    optimizedAllocationMatrix,
     stepToggle: {
       isActive: isByStep,
       onChange: toggleByStep,
@@ -305,7 +359,8 @@ const useTableInput = () => {
       onChange: toggleBalas,
     },
     handleNextStep,
-    isSatisfied
+    isSatisfied,
+    isFinal
   }
 }
 
